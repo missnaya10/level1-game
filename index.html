@@ -1,0 +1,2103 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>LEVEL 1 RUNNER | تحدي لفل ون</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0a0908;
+      --card-bg: #171412;
+      --primary: #ff7b00;
+      --primary-light: #ffaa00;
+      --gold: #ffd700;
+      --text: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      font-family: 'Cairo', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text);
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #game-container {
+      position: relative;
+      width: 100%;
+      max-width: 480px;
+      height: 100%;
+      background: linear-gradient(180deg, #120e0b 0%, #1f1711 100%);
+      overflow: hidden;
+      box-shadow: 0 0 45px rgba(255, 123, 0, 0.22);
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+    }
+
+    .overlay-screen {
+      position: absolute;
+      inset: 0;
+      background: rgba(10, 9, 8, 0.97);
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 18px 14px;
+      z-index: 20;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .header-title {
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .badge {
+      background: linear-gradient(90deg, var(--primary), var(--primary-light));
+      color: #0a0908;
+      font-weight: 900;
+      font-size: 11px;
+      padding: 3px 14px;
+      border-radius: 20px;
+      display: inline-block;
+      margin-bottom: 5px;
+      cursor: pointer;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 900;
+      background: linear-gradient(to left, #ffffff, var(--primary-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 12px;
+      color: #b8a99a;
+    }
+
+    .char-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 9px;
+      width: 100%;
+      flex: 1;
+      min-height: 150px;
+      max-height: 55vh;
+      overflow-y: auto;
+      padding: 4px;
+      touch-action: pan-y;
+    }
+
+    .char-card {
+      background: var(--card-bg);
+      border: 2px solid #2e241d;
+      border-radius: 13px;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      cursor: pointer;
+      min-height: 64px;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+
+    .char-card.selected {
+      border-color: var(--primary);
+      background: rgba(255, 123, 0, 0.14);
+      box-shadow: 0 0 14px rgba(255, 123, 0, 0.3);
+    }
+
+    .char-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 13px;
+      color: #fff;
+      flex-shrink: 0;
+      overflow: hidden;
+      border: 2px solid rgba(255,255,255,0.25);
+    }
+
+    .char-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .char-info {
+      text-align: right;
+      overflow: hidden;
+    }
+
+    .char-name {
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .char-tag {
+      font-size: 11px;
+      color: var(--primary-light);
+      font-weight: 700;
+    }
+
+    .controls-hint {
+      font-size: 11px;
+      color: #c9b9a9;
+      background: rgba(255, 123, 0, 0.08);
+      border: 1px solid rgba(255, 123, 0, 0.2);
+      padding: 7px 10px;
+      border-radius: 10px;
+      text-align: center;
+      width: 100%;
+      flex-shrink: 0;
+    }
+
+    .btn-main {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(90deg, var(--primary), var(--primary-light));
+      color: #0a0908;
+      font-size: 17px;
+      font-weight: 900;
+      cursor: pointer;
+      flex-shrink: 0;
+      box-shadow: 0 6px 22px rgba(255, 123, 0, 0.4);
+    }
+
+    .btn-secondary {
+      width: 100%;
+      padding: 12px;
+      border: 1.5px solid rgba(255, 123, 0, 0.5);
+      border-radius: 14px;
+      background: #1c1612;
+      color: var(--primary-light);
+      font-size: 15px;
+      font-weight: 900;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .btn-main:active, .btn-secondary:active {
+      transform: scale(0.97);
+    }
+
+    .end-actions {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    #hud {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      right: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 15;
+      pointer-events: none;
+    }
+
+    .hud-box {
+      background: rgba(18, 14, 11, 0.88);
+      border: 1px solid rgba(255, 123, 0, 0.35);
+      padding: 6px 14px;
+      border-radius: 12px;
+      font-weight: 900;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .coin-text { color: var(--gold); }
+    .score-text { color: var(--primary-light); }
+
+    #pin-modal {
+      position: absolute;
+      inset: 0;
+      background: rgba(10, 9, 8, 0.94);
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .pin-box {
+      background: #171412;
+      border: 2px solid var(--primary);
+      border-radius: 18px;
+      padding: 20px;
+      width: 100%;
+      max-width: 320px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    #studio-modal {
+      position: absolute;
+      inset: 0;
+      background: #0d0b09;
+      z-index: 45;
+      display: flex;
+      flex-direction: column;
+      padding: 14px;
+      gap: 10px;
+    }
+
+    .studio-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #2b221a;
+      padding-bottom: 10px;
+    }
+
+    .studio-tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 5px;
+    }
+
+    .tab-btn {
+      padding: 7px 4px;
+      border-radius: 10px;
+      border: 1px solid #33271e;
+      background: #171412;
+      color: #b8a99a;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .tab-btn.active {
+      background: rgba(255, 123, 0, 0.16);
+      border-color: var(--primary);
+      color: var(--primary-light);
+    }
+
+    .studio-body {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-bottom: 8px;
+    }
+
+    .studio-item {
+      background: #171412;
+      border: 1px solid #2e241d;
+      border-radius: 12px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .studio-item-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .mini-btn {
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      background: #2e241d;
+      color: #fff;
+    }
+
+    .mini-btn.orange {
+      background: var(--primary);
+      color: #0a0908;
+    }
+
+    .mini-btn.red {
+      background: #e63946;
+      color: #fff;
+    }
+
+    .studio-input {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #3b2e24;
+      background: #0d0b09;
+      color: #fff;
+      font-size: 12px;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    #video-popup {
+      position: absolute;
+      top: 13%;
+      left: 50%;
+      transform: translateX(-50%) scale(0.94);
+      width: 93%;
+      max-width: 420px;
+      background: #171412;
+      border: 2.5px solid var(--primary-light);
+      border-radius: 18px;
+      padding: 12px;
+      z-index: 30;
+      box-shadow: 0 14px 44px rgba(255, 123, 0, 0.65);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    #video-popup.active {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+      pointer-events: auto;
+    }
+
+    .popup-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 900;
+      color: #fff;
+    }
+
+    .popup-timer {
+      background: rgba(255, 123, 0, 0.28);
+      padding: 2px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--primary-light);
+    }
+
+    #popup-video-player {
+      width: 100%;
+      max-height: 270px;
+      border-radius: 12px;
+      background: #000;
+      display: block;
+      object-fit: contain;
+    }
+
+    #popup-video-status {
+      margin-top: 6px;
+      font-size: 11px;
+      color: #ffb703;
+      text-align: center;
+      min-height: 16px;
+    }
+
+    #question-modal {
+      position: absolute;
+      inset: 0;
+      background: rgba(10, 9, 8, 0.92);
+      backdrop-filter: blur(6px);
+      z-index: 35;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .question-card {
+      width: 100%;
+      max-width: 390px;
+      background: #171412;
+      border: 2.5px solid var(--primary);
+      border-radius: 20px;
+      padding: 18px 14px;
+      box-shadow: 0 12px 40px rgba(255, 123, 0, 0.45);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .question-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .question-badge {
+      background: rgba(255, 123, 0, 0.2);
+      color: var(--primary-light);
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .question-timer-pill {
+      background: var(--primary);
+      color: #0a0908;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .question-text {
+      font-size: 17px;
+      font-weight: 900;
+      color: #fff;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .option-btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1.5px solid #36291f;
+      background: #1f1914;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      text-align: right;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .option-btn:hover {
+      border-color: var(--primary-light);
+      background: rgba(255, 123, 0, 0.15);
+    }
+
+    .result-card {
+      width: 100%;
+      background: linear-gradient(145deg, #1c1612, #100d0b);
+      border: 2px solid var(--primary);
+      border-radius: 20px;
+      padding: 18px 16px;
+      text-align: center;
+      box-shadow: 0 0 32px rgba(255, 123, 0, 0.25);
+    }
+
+    .result-avatar {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      margin: 0 auto 10px;
+      border: 3px solid var(--primary-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      font-weight: 900;
+      overflow: hidden;
+    }
+
+    .result-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .rank-title {
+      background: rgba(255, 123, 0, 0.18);
+      border: 1px solid var(--primary);
+      color: var(--primary-light);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 15px;
+      font-weight: 900;
+      display: inline-block;
+      margin: 8px 0 14px;
+    }
+
+    .stats-row {
+      display: flex;
+      justify-content: space-around;
+      background: rgba(0,0,0,0.4);
+      padding: 12px;
+      border-radius: 14px;
+      margin-bottom: 12px;
+    }
+
+    .stat-item span {
+      display: block;
+      font-size: 12px;
+      color: #b8a99a;
+    }
+
+    .stat-item strong {
+      font-size: 21px;
+      font-weight: 900;
+    }
+
+    .screenshot-note {
+      font-size: 12px;
+      color: var(--primary-light);
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+<div id="game-container">
+  <div id="hud" class="hidden">
+    <div class="hud-box score-text">السكور: <span id="score-val">0</span></div>
+    <div class="hud-box coin-text">🪙 <span id="coin-val">0</span></div>
+  </div>
+
+  <div id="video-popup">
+    <div class="popup-header">
+      <span id="popup-title">🎬 لقطة مفاجئة!</span>
+      <span class="popup-timer" id="popup-countdown">4s</span>
+    </div>
+    <video id="popup-video-player" autoplay playsinline preload="auto"></video>
+    <div id="popup-video-status"></div>
+  </div>
+
+  <div id="question-modal" class="hidden">
+    <div class="question-card">
+      <div class="question-top">
+        <span class="question-badge">❓ سؤال مفاجئ</span>
+        <span class="question-timer-pill" id="q-countdown">15s</span>
+      </div>
+      <div class="question-text" id="q-text">السؤال هنا</div>
+      <div class="options-list" id="q-options"></div>
+    </div>
+  </div>
+
+  <canvas id="gameCanvas"></canvas>
+
+  <div id="start-screen" class="overlay-screen">
+    <div class="header-title">
+      <span class="badge" id="secret-admin-trigger">LEVEL 1 CLAN</span>
+      <h1>تحدي ركض لفل ون</h1>
+      <p class="subtitle">اختر شخصيتك وتفادى العقبات بأعلى سرعة</p>
+    </div>
+
+    <div class="char-grid" id="char-grid"></div>
+
+    <div class="controls-hint">
+      اسحب ⬆️ للقفز | ⬇️ للانزلاق | ⬅️➡️ لتغيير المسار
+    </div>
+
+    <button type="button" class="btn-main" id="start-btn">ابدأ التحدي 🚀</button>
+  </div>
+
+  <div id="pin-modal" class="hidden">
+    <div class="pin-box">
+      <strong style="font-size: 16px; color: var(--primary-light);">🔒 دخول المالك فقط</strong>
+      <p style="font-size: 12px; color: #b8a99a;">أدخلي الرمز السري لتعديل الصور والفيديوهات والأسئلة</p>
+      <input type="password" id="pin-input" class="studio-input" style="text-align:center; font-size:18px; letter-spacing:4px;" placeholder="••••" inputmode="numeric" />
+      <p id="pin-error" style="font-size:11px; color:#ff4d4d; display:none;">الرمز السري غير صحيح</p>
+      <div class="studio-item-row">
+        <button type="button" class="mini-btn" style="flex:1; padding:10px;" id="pin-cancel-btn">إلغاء</button>
+        <button type="button" class="mini-btn orange" style="flex:1; padding:10px;" id="pin-submit-btn">دخول</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="studio-modal" class="hidden">
+    <div class="studio-top">
+      <strong style="font-size: 14px; color: var(--primary-light);">⚙️ لوحة التحكم الحصرية</strong>
+      <button type="button" class="mini-btn red" id="close-studio-btn">حفظ وإغلاق ✕</button>
+    </div>
+
+    <div class="studio-tabs">
+      <button type="button" class="tab-btn active" id="tab-videos-btn">🎬 الفيديوهات</button>
+      <button type="button" class="tab-btn" id="tab-questions-btn">❓ الأسئلة</button>
+      <button type="button" class="tab-btn" id="tab-images-btn">🖼️ الصور</button>
+      <button type="button" class="tab-btn" id="tab-security-btn">🔑 الرمز</button>
+    </div>
+
+    <div class="studio-body" id="studio-videos-panel">
+      <div class="studio-item">
+        <div class="studio-item-row">
+          <span style="font-size: 12px; font-weight: 800;">تفعيل ظهور الفيديوهات أثناء اللعب</span>
+          <input type="checkbox" id="cfg-schedule-enabled" checked />
+        </div>
+        <div class="studio-item-row">
+          <span style="font-size: 12px; font-weight: 800;">إيقاف الركض مؤقتاً وقت الفيديو</span>
+          <input type="checkbox" id="cfg-pause-on-video" />
+        </div>
+        <p style="font-size: 11px; color: #b8a99a;">💡 لكي تظهر الفيديوهات لكل اللاعبين على أي جهاز، ارفعي ملف الفيديو (مثل scare1.mp4) في مستودع GitHub واكتبي اسمه أو رابطه المباشر هنا.</p>
+      </div>
+
+      <div class="studio-item">
+        <strong style="font-size: 13px; color: var(--primary-light);">➕ إضافة فيديو (يضحك أو يفجع)</strong>
+        <input type="text" id="new-video-title" class="studio-input" placeholder="عنوان اللقطة (مثال: لقطة تفجع / ميم يضحك)" />
+        <select id="new-video-mood" class="studio-input">
+          <option value="funny">😂 يضحك</option>
+          <option value="scare">😱 يفجع</option>
+        </select>
+        <input type="text" id="new-video-url" class="studio-input" placeholder="اسم الملف في المستودع (مثل scare1.mp4) أو رابط https مباشر" />
+        <div class="studio-item-row">
+          <label class="mini-btn orange" style="cursor:pointer;">
+            📁 معاينة من الجهاز
+            <input type="file" id="new-video-file" accept="video/*" style="display:none;" />
+          </label>
+          <input type="number" id="new-video-duration" class="studio-input" style="width: 75px;" min="2" max="20" value="4" title="المدة بالثواني" />
+          <span style="font-size: 11px; color: #b8a99a;">ثانية</span>
+        </div>
+        <button type="button" class="mini-btn orange" id="add-video-btn" style="padding: 8px; font-size: 12px;">إضافة الفيديو للقائمة</button>
+      </div>
+
+      <div class="studio-item">
+        <strong style="font-size: 13px; color: var(--gold);">⏱️ تحديد أوقات الظهور أثناء تركيز اللاعب</strong>
+        <div class="studio-item-row">
+          <span style="font-size: 11px; color: #b8a99a;">يظهر عند الثانية:</span>
+          <input type="number" id="sched-second" class="studio-input" style="width: 70px;" min="2" max="180" value="7" />
+          <select id="sched-video-select" class="studio-input" style="flex:1;"></select>
+          <button type="button" class="mini-btn orange" id="add-schedule-btn">+ جدولة</button>
+        </div>
+        <div id="schedules-list-container"></div>
+      </div>
+
+      <div id="videos-list-container"></div>
+    </div>
+
+    <div class="studio-body hidden" id="studio-questions-panel">
+      <div class="studio-item">
+        <div class="studio-item-row">
+          <span style="font-size: 12px; font-weight: 800;">تفعيل الأسئلة المفاجئة (15 ثانية للإجابة)</span>
+          <input type="checkbox" id="cfg-questions-enabled" checked />
+        </div>
+        <div class="studio-item-row">
+          <span style="font-size: 12px; font-weight: 800;">يظهر أول سؤال عند الثانية:</span>
+          <input type="number" id="cfg-q-start-sec" class="studio-input" style="width: 75px;" min="3" max="180" value="12" />
+        </div>
+      </div>
+
+      <div class="studio-item">
+        <strong style="font-size: 13px; color: var(--primary-light);">➕ إضافة سؤال جديد</strong>
+        <input type="text" id="new-q-text" class="studio-input" placeholder="اكتب السؤال هنا..." />
+        <input type="text" id="new-q-opt1" class="studio-input" placeholder="الخيار الأول" />
+        <input type="text" id="new-q-opt2" class="studio-input" placeholder="الخيار الثاني" />
+        <input type="text" id="new-q-opt3" class="studio-input" placeholder="الخيار الثالث (اختياري)" />
+        <select id="new-q-correct" class="studio-input">
+          <option value="0">الإجابة الصحيحة: الخيار الأول</option>
+          <option value="1">الإجابة الصحيحة: الخيار الثاني</option>
+          <option value="2">الإجابة الصحيحة: الخيار الثالث</option>
+        </select>
+        <button type="button" class="mini-btn orange" id="add-question-btn" style="padding: 8px; font-size: 12px;">إضافة السؤال للقائمة</button>
+      </div>
+
+      <div id="questions-list-container"></div>
+    </div>
+
+    <div class="studio-body hidden" id="studio-images-panel"></div>
+
+    <div class="studio-body hidden" id="studio-security-panel">
+      <div class="studio-item">
+        <strong style="font-size: 13px; color: var(--primary-light);">🔑 تغيير الرمز السري للوحة التحكم</strong>
+        <p style="font-size: 11px; color: #b8a99a;">لفتح هذه اللوحة: اضغطي ضغطتين سريعتين على كلمة LEVEL 1 CLAN في أعلى الشاشة الرئيسية ثم أدخلي رمزك.</p>
+        <input type="text" id="new-pin-input" class="studio-input" placeholder="أدخلي الرمز السري الجديد (مثلاً 2026)" inputmode="numeric" />
+        <button type="button" class="mini-btn orange" id="save-pin-btn" style="padding: 8px;">حفظ الرمز الجديد</button>
+        <p id="pin-saved-msg" style="font-size: 11px; color: #4ade80; display:none;">تم تحديث الرمز السري بنجاح ✓</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="gameover-screen" class="overlay-screen hidden">
+    <div class="header-title">
+      <span class="badge">انتهت الجولة!</span>
+      <h1>بطاقة النتيجة</h1>
+    </div>
+
+    <div class="result-card">
+      <div class="result-avatar" id="res-avatar"></div>
+      <h2 id="res-name" style="font-size: 20px; font-weight: 900;"></h2>
+      <div class="rank-title" id="res-rank">لا عاد تلعب 🙏🏼</div>
+
+      <div class="stats-row">
+        <div class="stat-item">
+          <span>الكوينز</span>
+          <strong id="res-coins" style="color: var(--gold);">0</strong>
+        </div>
+        <div class="stat-item">
+          <span>السكور النهائي</span>
+          <strong id="res-score" style="color: var(--primary-light);">0</strong>
+        </div>
+        <div class="stat-item">
+          <span>أعلى رقم</span>
+          <strong id="res-best" style="color: #fff;">0</strong>
+        </div>
+      </div>
+
+      <p class="screenshot-note">📸 صوّر الشاشة وشارك نتيجتك في تويتر #لفل_ون</p>
+    </div>
+
+    <div class="end-actions">
+      <button type="button" class="btn-main" id="restart-btn">العب مرة ثانية 🔄</button>
+      <button type="button" class="btn-secondary" id="home-btn">الشاشة الرئيسية 🏠</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // =========================================================================
+  // ✅ إعدادات ثابتة للجميع (تظهر لكل اللاعبين على أي جهاز)
+  // ارفعي ملفات الصور والفيديوهات في نفس المستودع بجانب index.html
+  // ثم اكتبي اسم الملف هنا، مثلاً: 'mans.jpg' أو 'scare1.mp4'
+  // =========================================================================
+  const SHARED_CHAR_IMAGES = {
+    mans: '',      // مثال: 'mans.jpg'
+    hashemi: '',   // مثال: 'hashemi.jpg'
+    vfiras: '',    // مثال: 'vfiras.jpg'
+    oflag: '',     // مثال: 'oflag.jpg'
+    musab: '',     // مثال: 'musab.jpg'
+    tmnaa: '',     // مثال: 'tmnaa.jpg'
+    ezz: '',       // مثال: 'ezz.jpg'
+    abs: ''        // مثال: 'abs.jpg'
+  };
+
+  const SHARED_VIDEOS = [
+    // مثال لإضافة فيديو يظهر للجميع:
+    // { id: 'v_scare1', title: 'لقطة تفجع', mood: 'scare', url: 'scare1.mp4', durationSec: 4 },
+    // { id: 'v_funny1', title: 'لقطة تضحك', mood: 'funny', url: 'funny1.mp4', durationSec: 4 }
+  ];
+
+  const SHARED_SCHEDULES = [
+    // مثال لجدولة ظهور الفيديو عند ثانية معينة أثناء اللعب:
+    // { id: 's1', second: 7, videoId: 'v_scare1' }
+  ];
+  // =========================================================================
+
+  const DEFAULT_CHARACTERS = [
+    { id: 'mans',    name: 'منص',              tag: 'otnxx',  color: '#ff6b00', img: '' },
+    { id: 'hashemi', name: 'علي الهاشمي',      tag: 'xlxwi',  color: '#ff8800', img: '' },
+    { id: 'vfiras',  name: 'فراس (ابوفهده)',  tag: 'vFiras', color: '#ff9e00', img: '' },
+    { id: 'oflag',   name: 'اوفلاق',           tag: 'oFLaG',  color: '#e85d04', img: '' },
+    { id: 'musab',   name: 'مصـعب',            tag: 'Muvxn',  color: '#f48c06', img: '' },
+    { id: 'tmnaa',   name: 'عبدالله (تمنا)',   tag: 'Tmnaa',  color: '#dc2f02', img: '' },
+    { id: 'ezz',     name: 'عز',               tag: 'Azz',    color: '#faa307', img: '' },
+    { id: 'abs',     name: 'محمد القحطاني',    tag: 'ABS',    color: '#d00000', img: '' }
+  ];
+
+  const DEFAULT_QUESTIONS = [
+    {
+      id: 'q1',
+      question: 'وش اسم الكلان الأساسي في التحدي؟',
+      options: ['LEVEL 1 CLAN', 'TEAM ZERO', 'CLAN X'],
+      correctIndex: 0
+    },
+    {
+      id: 'q2',
+      question: 'كم نقطة يزيد الكوينز الواحد في اللعبة؟',
+      options: ['نقطة واحدة', '3 نقاط', '10 نقاط'],
+      correctIndex: 1
+    }
+  ];
+
+  let ADMIN_PIN = localStorage.getItem('lvl1_admin_pin') || '1111';
+
+  let CHARACTERS = JSON.parse(JSON.stringify(DEFAULT_CHARACTERS));
+  try {
+    const savedImgs = JSON.parse(localStorage.getItem('lvl1_char_imgs_v2') || '{}');
+    CHARACTERS.forEach(c => {
+      c.img = SHARED_CHAR_IMAGES[c.id] || savedImgs[c.id] || '';
+    });
+  } catch (e) {
+    CHARACTERS.forEach(c => {
+      c.img = SHARED_CHAR_IMAGES[c.id] || '';
+    });
+  }
+
+  let QUESTIONS = JSON.parse(JSON.stringify(DEFAULT_QUESTIONS));
+  let QUESTIONS_ENABLED = true;
+  let QUESTION_START_SEC = 12;
+
+  try {
+    const savedQs = JSON.parse(localStorage.getItem('lvl1_questions_v1') || 'null');
+    if (Array.isArray(savedQs) && savedQs.length > 0) {
+      QUESTIONS = savedQs;
+    }
+    const savedQEnabled = localStorage.getItem('lvl1_questions_enabled_v1');
+    if (savedQEnabled !== null) QUESTIONS_ENABLED = savedQEnabled === 'true';
+    const savedQSec = Number(localStorage.getItem('lvl1_question_start_sec_v1'));
+    if (savedQSec >= 2) QUESTION_START_SEC = savedQSec;
+  } catch (e) {}
+
+  function saveQuestionsConfig() {
+    try {
+      localStorage.setItem('lvl1_questions_v1', JSON.stringify(QUESTIONS));
+      localStorage.setItem('lvl1_questions_enabled_v1', String(QUESTIONS_ENABLED));
+      localStorage.setItem('lvl1_question_start_sec_v1', String(QUESTION_START_SEC));
+    } catch (e) {}
+  }
+
+  const POPUP_CONFIG = {
+    scheduleEnabled: true,
+    pauseGameDuringVideo: false,
+    videos: JSON.parse(JSON.stringify(SHARED_VIDEOS)),
+    schedules: JSON.parse(JSON.stringify(SHARED_SCHEDULES))
+  };
+
+  try {
+    const savedVideos = JSON.parse(localStorage.getItem('lvl1_popup_videos_v2') || '[]');
+    if (Array.isArray(savedVideos)) {
+      savedVideos.forEach(v => {
+        if (v && v.url && !String(v.url).startsWith('blob:') && !POPUP_CONFIG.videos.some(sv => sv.id === v.id)) {
+          POPUP_CONFIG.videos.push(v);
+        }
+      });
+    }
+    const savedSched = JSON.parse(localStorage.getItem('lvl1_popup_schedules_v2') || '[]');
+    if (Array.isArray(savedSched)) {
+      savedSched.forEach(s => {
+        if (s && !POPUP_CONFIG.schedules.some(ss => ss.id === s.id)) {
+          POPUP_CONFIG.schedules.push(s);
+        }
+      });
+      POPUP_CONFIG.schedules.sort((a, b) => a.second - b.second);
+    }
+  } catch (e) {}
+
+  let pendingUploadedVideoUrl = '';
+  let userHasInteractedWithAudio = false;
+
+  function unlockAudioContext() {
+    userHasInteractedWithAudio = true;
+    const videoEl = document.getElementById('popup-video-player');
+    if (videoEl && !videoEl.paused && videoEl.muted) {
+      videoEl.muted = false;
+    }
+  }
+  window.addEventListener('pointerdown', unlockAudioContext, { passive: true });
+  window.addEventListener('touchstart', unlockAudioContext, { passive: true });
+
+  let audioCtx = null;
+  function playCoinSound() {
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      if (!audioCtx) audioCtx = new AudioContextClass();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(987.77, now);
+      osc.frequency.setValueAtTime(1318.51, now + 0.07);
+
+      gain.gain.setValueAtTime(0.18, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + 0.23);
+    } catch (e) {}
+  }
+
+  function prepareCharacterImages() {
+    CHARACTERS.forEach(char => {
+      if (char.img) {
+        const imageObj = new Image();
+        imageObj.src = char.img;
+        char.loadedImg = imageObj;
+      } else {
+        char.loadedImg = null;
+      }
+    });
+  }
+  prepareCharacterImages();
+
+  let selectedChar = CHARACTERS[0];
+  let bestScore = Number(localStorage.getItem('lvl1_best') || 0);
+
+  function renderCharacterGrid() {
+    const charGrid = document.getElementById('char-grid');
+    charGrid.innerHTML = '';
+
+    CHARACTERS.forEach((char) => {
+      const isSelected = selectedChar && selectedChar.id === char.id;
+      const card = document.createElement('div');
+      card.className = 'char-card' + (isSelected ? ' selected' : '');
+
+      const avatarHTML = char.img
+        ? `<img src="${char.img}" alt="${char.name}">`
+        : `<span>${char.tag.slice(0, 3)}</span>`;
+
+      card.innerHTML = `
+        <div class="char-avatar" style="background: ${char.color};">${avatarHTML}</div>
+        <div class="char-info">
+          <div class="char-name">${char.name}</div>
+          <div class="char-tag">${char.tag}</div>
+        </div>
+      `;
+
+      card.addEventListener('click', () => {
+        selectedChar = char;
+        renderCharacterGrid();
+      });
+
+      charGrid.appendChild(card);
+    });
+  }
+  renderCharacterGrid();
+
+  document.getElementById('secret-admin-trigger').addEventListener('dblclick', () => {
+    document.getElementById('pin-input').value = '';
+    document.getElementById('pin-error').style.display = 'none';
+    document.getElementById('pin-modal').classList.remove('hidden');
+  });
+
+  document.getElementById('pin-cancel-btn').addEventListener('click', () => {
+    document.getElementById('pin-modal').classList.add('hidden');
+  });
+
+  document.getElementById('pin-submit-btn').addEventListener('click', () => {
+    const entered = document.getElementById('pin-input').value.trim();
+    if (entered === ADMIN_PIN) {
+      document.getElementById('pin-modal').classList.add('hidden');
+      renderVideosStudio();
+      renderQuestionsStudio();
+      renderImagesStudio();
+      document.getElementById('studio-modal').classList.remove('hidden');
+    } else {
+      document.getElementById('pin-error').style.display = 'block';
+    }
+  });
+
+  document.getElementById('save-pin-btn').addEventListener('click', () => {
+    const newPin = document.getElementById('new-pin-input').value.trim();
+    if (newPin.length >= 4) {
+      ADMIN_PIN = newPin;
+      localStorage.setItem('lvl1_admin_pin', ADMIN_PIN);
+      document.getElementById('new-pin-input').value = '';
+      const msg = document.getElementById('pin-saved-msg');
+      msg.style.display = 'block';
+      setTimeout(() => { msg.style.display = 'none'; }, 2500);
+    }
+  });
+
+  function renderQuestionsStudio() {
+    document.getElementById('cfg-questions-enabled').checked = QUESTIONS_ENABLED;
+    document.getElementById('cfg-q-start-sec').value = QUESTION_START_SEC;
+
+    const listEl = document.getElementById('questions-list-container');
+    listEl.innerHTML = '';
+
+    if (QUESTIONS.length === 0) {
+      listEl.innerHTML = `<div class="studio-item" style="text-align:center; color:#b8a99a; font-size:12px;">أضيفي سؤالاً واحداً على الأقل لتفعيل تحدي الـ 15 ثانية.</div>`;
+      return;
+    }
+
+    QUESTIONS.forEach((qItem, idx) => {
+      const div = document.createElement('div');
+      div.className = 'studio-item';
+      const correctText = qItem.options[qItem.correctIndex] || qItem.options[0];
+      div.innerHTML = `
+        <div class="studio-item-row">
+          <div style="flex:1;">
+            <div style="font-size:13px; font-weight:800;">${idx + 1}. ${qItem.question}</div>
+            <div style="font-size:11px; color:#4ade80;">✓ الإجابة: ${correctText}</div>
+          </div>
+          <button type="button" class="mini-btn red" data-del-q="${qItem.id}">حذف</button>
+        </div>
+      `;
+      listEl.appendChild(div);
+    });
+
+    listEl.querySelectorAll('[data-del-q]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const qid = btn.getAttribute('data-del-q');
+        QUESTIONS = QUESTIONS.filter(q => q.id !== qid);
+        saveQuestionsConfig();
+        renderQuestionsStudio();
+      });
+    });
+  }
+
+  document.getElementById('cfg-questions-enabled').addEventListener('change', (e) => {
+    QUESTIONS_ENABLED = e.target.checked;
+    saveQuestionsConfig();
+  });
+
+  document.getElementById('cfg-q-start-sec').addEventListener('change', (e) => {
+    QUESTION_START_SEC = Math.max(3, Math.min(180, Number(e.target.value) || 12));
+    saveQuestionsConfig();
+  });
+
+  document.getElementById('add-question-btn').addEventListener('click', () => {
+    const qText = document.getElementById('new-q-text').value.trim();
+    const o1 = document.getElementById('new-q-opt1').value.trim();
+    const o2 = document.getElementById('new-q-opt2').value.trim();
+    const o3 = document.getElementById('new-q-opt3').value.trim();
+    const correctIdx = Number(document.getElementById('new-q-correct').value) || 0;
+
+    if (!qText || !o1 || !o2) return;
+    const opts = [o1, o2];
+    if (o3) opts.push(o3);
+    const safeCorrect = correctIdx < opts.length ? correctIdx : 0;
+
+    QUESTIONS.push({
+      id: 'q_' + Date.now(),
+      question: qText,
+      options: opts,
+      correctIndex: safeCorrect
+    });
+
+    document.getElementById('new-q-text').value = '';
+    document.getElementById('new-q-opt1').value = '';
+    document.getElementById('new-q-opt2').value = '';
+    document.getElementById('new-q-opt3').value = '';
+
+    saveQuestionsConfig();
+    renderQuestionsStudio();
+  });
+
+  function compressImageFile(file, callback) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const maxSize = 240;
+        let w = img.width;
+        let h = img.height;
+        if (w > h && w > maxSize) {
+          h = Math.round((h * maxSize) / w);
+          w = maxSize;
+        } else if (h >= w && h > maxSize) {
+          w = Math.round((w * maxSize) / h);
+          h = maxSize;
+        }
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = w;
+        tempCanvas.height = h;
+        const tctx = tempCanvas.getContext('2d');
+        tctx.drawImage(img, 0, 0, w, h);
+        callback(tempCanvas.toDataURL('image/jpeg', 0.85));
+      };
+      img.src = String(reader.result);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function renderImagesStudio() {
+    const panel = document.getElementById('studio-images-panel');
+    panel.innerHTML = '';
+
+    CHARACTERS.forEach((char) => {
+      const item = document.createElement('div');
+      item.className = 'studio-item';
+
+      const avatarHTML = char.img
+        ? `<img src="${char.img}" alt="${char.name}">`
+        : `<span>${char.tag.slice(0, 2)}</span>`;
+
+      item.innerHTML = `
+        <div class="studio-item-row">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div class="char-avatar" style="width:38px; height:38px; font-size:12px; background:${char.color};">${avatarHTML}</div>
+            <div>
+              <div style="font-size:13px; font-weight:800;">${char.name}</div>
+              <div style="font-size:11px; color:var(--primary-light);">${char.tag}</div>
+            </div>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <label class="mini-btn orange" style="cursor:pointer;">
+              اختيار صورة
+              <input type="file" accept="image/*" style="display:none;" data-char-id="${char.id}" class="char-file-input" />
+            </label>
+            ${char.img ? `<button type="button" class="mini-btn red" data-clear-id="${char.id}">حذف</button>` : ''}
+          </div>
+        </div>
+        <input type="text" class="studio-input char-url-input" data-char-id="${char.id}" value="${char.img.startsWith('data:') ? '' : char.img}" placeholder="اسم الملف في المستودع (مثل mans.jpg) أو رابط صورة..." />
+      `;
+
+      panel.appendChild(item);
+    });
+
+    panel.querySelectorAll('.char-file-input').forEach(input => {
+      input.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const charId = e.target.getAttribute('data-char-id');
+        compressImageFile(file, (compressedDataUrl) => {
+          updateCharacterImage(charId, compressedDataUrl);
+          renderImagesStudio();
+          renderCharacterGrid();
+        });
+      });
+    });
+
+    panel.querySelectorAll('.char-url-input').forEach(input => {
+      input.addEventListener('change', (e) => {
+        const charId = e.target.getAttribute('data-char-id');
+        updateCharacterImage(charId, e.target.value.trim());
+        renderImagesStudio();
+        renderCharacterGrid();
+      });
+    });
+
+    panel.querySelectorAll('[data-clear-id]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const charId = btn.getAttribute('data-clear-id');
+        updateCharacterImage(charId, '');
+        renderImagesStudio();
+        renderCharacterGrid();
+      });
+    });
+  }
+
+  function updateCharacterImage(charId, imgValue) {
+    const target = CHARACTERS.find(c => c.id === charId);
+    if (!target) return;
+    target.img = imgValue;
+    if (selectedChar && selectedChar.id === charId) {
+      selectedChar = target;
+    }
+    prepareCharacterImages();
+
+    try {
+      const savedImgs = {};
+      CHARACTERS.forEach(c => {
+        if (c.img && !String(c.img).startsWith('data:')) savedImgs[c.id] = c.img;
+      });
+      localStorage.setItem('lvl1_char_imgs_v2', JSON.stringify(savedImgs));
+    } catch (e) {}
+  }
+
+  function renderVideosStudio() {
+    document.getElementById('cfg-schedule-enabled').checked = POPUP_CONFIG.scheduleEnabled;
+    document.getElementById('cfg-pause-on-video').checked = POPUP_CONFIG.pauseGameDuringVideo;
+
+    const selectEl = document.getElementById('sched-video-select');
+    selectEl.innerHTML = '';
+    POPUP_CONFIG.videos.forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v.id;
+      opt.textContent = `${v.mood === 'scare' ? '😱' : '😂'} ${v.title}`;
+      selectEl.appendChild(opt);
+    });
+
+    const schedContainer = document.getElementById('schedules-list-container');
+    schedContainer.innerHTML = '';
+    if (POPUP_CONFIG.schedules.length === 0) {
+      schedContainer.innerHTML = `<div style="font-size:11px; color:#b8a99a; margin-top:6px;">لا توجد أوقات مجدولة حالياً.</div>`;
+    } else {
+      POPUP_CONFIG.schedules.forEach((sch) => {
+        const vid = POPUP_CONFIG.videos.find(v => v.id === sch.videoId);
+        const div = document.createElement('div');
+        div.className = 'studio-item-row';
+        div.style.marginTop = '6px';
+        div.style.padding = '6px 8px';
+        div.style.background = '#0d0b09';
+        div.style.borderRadius = '8px';
+        div.innerHTML = `
+          <span style="font-size:11px; font-weight:800;">⏱️ ثانية ${sch.second} ← ${vid ? vid.title : 'فيديو محذوف'}</span>
+          <button type="button" class="mini-btn red" data-del-sched="${sch.id}">حذف</button>
+        `;
+        schedContainer.appendChild(div);
+      });
+
+      schedContainer.querySelectorAll('[data-del-sched]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const sid = btn.getAttribute('data-del-sched');
+          POPUP_CONFIG.schedules = POPUP_CONFIG.schedules.filter(s => s.id !== sid);
+          savePopupConfig();
+          renderVideosStudio();
+        });
+      });
+    }
+
+    const container = document.getElementById('videos-list-container');
+    container.innerHTML = '';
+
+    if (POPUP_CONFIG.videos.length === 0) {
+      container.innerHTML = `<div class="studio-item" style="text-align:center; color:#b8a99a; font-size:12px;">أضيفي فيديوهات (يضحك أو يفجع) وحددي أوقات ظهورها أثناء اللعب.</div>`;
+      return;
+    }
+
+    POPUP_CONFIG.videos.forEach((vid) => {
+      const moodLabel = vid.mood === 'scare' ? '😱 يفجع' : '😂 يضحك';
+      const row = document.createElement('div');
+      row.className = 'studio-item';
+      row.innerHTML = `
+        <div class="studio-item-row">
+          <div>
+            <div style="font-size:13px; font-weight:800;">${vid.title} <span style="font-size:11px; color:var(--primary-light);">(${moodLabel})</span></div>
+            <div style="font-size:11px; color:#b8a99a;">المدة: ${vid.durationSec || 4} ثواني | الملف: ${vid.url}</div>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <button type="button" class="mini-btn orange" data-play-vid="${vid.id}">معاينة</button>
+            <button type="button" class="mini-btn red" data-del-vid="${vid.id}">حذف</button>
+          </div>
+        </div>
+      `;
+      container.appendChild(row);
+    });
+
+    container.querySelectorAll('[data-play-vid]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const vidId = btn.getAttribute('data-play-vid');
+        const found = POPUP_CONFIG.videos.find(v => v.id === vidId);
+        if (found) showSpecificVideoPopup(found);
+      });
+    });
+
+    container.querySelectorAll('[data-del-vid]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const vidId = btn.getAttribute('data-del-vid');
+        POPUP_CONFIG.videos = POPUP_CONFIG.videos.filter(v => v.id !== vidId);
+        POPUP_CONFIG.schedules = POPUP_CONFIG.schedules.filter(s => s.videoId !== vidId);
+        savePopupConfig();
+        renderVideosStudio();
+      });
+    });
+  }
+
+  function savePopupConfig() {
+    try {
+      const storableVideos = POPUP_CONFIG.videos.filter(v => v.url && !String(v.url).startsWith('blob:'));
+      localStorage.setItem('lvl1_popup_videos_v2', JSON.stringify(storableVideos));
+      localStorage.setItem('lvl1_popup_schedules_v2', JSON.stringify(POPUP_CONFIG.schedules));
+    } catch (e) {}
+  }
+
+  document.getElementById('close-studio-btn').addEventListener('click', () => {
+    document.getElementById('studio-modal').classList.add('hidden');
+  });
+
+  function switchStudioTab(activeTabId, activePanelId) {
+    ['tab-videos-btn', 'tab-questions-btn', 'tab-images-btn', 'tab-security-btn'].forEach(id => {
+      document.getElementById(id).classList.toggle('active', id === activeTabId);
+    });
+    ['studio-videos-panel', 'studio-questions-panel', 'studio-images-panel', 'studio-security-panel'].forEach(id => {
+      document.getElementById(id).classList.toggle('hidden', id !== activePanelId);
+    });
+  }
+
+  document.getElementById('tab-videos-btn').addEventListener('click', () => switchStudioTab('tab-videos-btn', 'studio-videos-panel'));
+  document.getElementById('tab-questions-btn').addEventListener('click', () => {
+    renderQuestionsStudio();
+    switchStudioTab('tab-questions-btn', 'studio-questions-panel');
+  });
+  document.getElementById('tab-images-btn').addEventListener('click', () => switchStudioTab('tab-images-btn', 'studio-images-panel'));
+  document.getElementById('tab-security-btn').addEventListener('click', () => switchStudioTab('tab-security-btn', 'studio-security-panel'));
+
+  document.getElementById('cfg-schedule-enabled').addEventListener('change', (e) => {
+    POPUP_CONFIG.scheduleEnabled = e.target.checked;
+  });
+
+  document.getElementById('cfg-pause-on-video').addEventListener('change', (e) => {
+    POPUP_CONFIG.pauseGameDuringVideo = e.target.checked;
+  });
+
+  document.getElementById('new-video-file').addEventListener('change', (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    pendingUploadedVideoUrl = URL.createObjectURL(file);
+    if (!document.getElementById('new-video-url').value.trim()) {
+      document.getElementById('new-video-url').value = file.name;
+    }
+    if (!document.getElementById('new-video-title').value.trim()) {
+      document.getElementById('new-video-title').value = file.name.replace(/\.[^/.]+$/, '');
+    }
+  });
+
+  document.getElementById('add-video-btn').addEventListener('click', () => {
+    const titleInput = document.getElementById('new-video-title');
+    const moodSelect = document.getElementById('new-video-mood');
+    const urlInput = document.getElementById('new-video-url');
+    const durInput = document.getElementById('new-video-duration');
+
+    const typedUrl = urlInput.value.trim();
+    const finalUrl = (typedUrl && !typedUrl.startsWith('blob:')) ? typedUrl : pendingUploadedVideoUrl;
+    if (!finalUrl) return;
+
+    POPUP_CONFIG.videos.push({
+      id: 'vid_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+      title: titleInput.value.trim() || (moodSelect.value === 'scare' ? 'لقطة تفجع' : 'لقطة تضحك'),
+      mood: moodSelect.value,
+      url: finalUrl,
+      durationSec: Math.max(2, Math.min(20, Number(durInput.value) || 4))
+    });
+
+    pendingUploadedVideoUrl = '';
+    titleInput.value = '';
+    urlInput.value = '';
+    document.getElementById('new-video-file').value = '';
+
+    savePopupConfig();
+    renderVideosStudio();
+  });
+
+  document.getElementById('add-schedule-btn').addEventListener('click', () => {
+    const secInput = document.getElementById('sched-second');
+    const selectEl = document.getElementById('sched-video-select');
+    if (!selectEl.value) return;
+
+    const secondVal = Math.max(2, Math.min(300, Number(secInput.value) || 7));
+    POPUP_CONFIG.schedules.push({
+      id: 'sch_' + Date.now(),
+      second: secondVal,
+      videoId: selectEl.value
+    });
+    POPUP_CONFIG.schedules.sort((a, b) => a.second - b.second);
+
+    savePopupConfig();
+    renderVideosStudio();
+  });
+
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  const container = document.getElementById('game-container');
+
+  let logicalWidth = 360;
+  let logicalHeight = 640;
+
+  function resizeCanvas() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 3);
+    logicalWidth = container.clientWidth || 360;
+    logicalHeight = container.clientHeight || 640;
+    canvas.width = logicalWidth * dpr;
+    canvas.height = logicalHeight * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  function drawRoundRect(x, y, w, h, r) {
+    const radius = Math.min(r, w / 2, h / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + w - radius, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+    ctx.lineTo(x + w, y + h - radius);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+    ctx.lineTo(x + radius, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+  }
+
+  let gameRunning = false;
+  let pausedByPopup = false;
+  let questionActive = false;
+  let animFrameId = null;
+  let score = 0;
+  let coins = 0;
+  const BASE_SPEED = 6.5;
+  const MAX_SPEED = 16.5;
+  let speed = BASE_SPEED;
+  let tempoLevel = 1;
+  let frameCount = 0;
+  let roadOffset = 0;
+  let popupTimeout = null;
+  let countdownInterval = null;
+  let questionTimerInterval = null;
+  let questionTimeout = null;
+  let triggeredScheduleIds = new Set();
+  let usedQuestionIds = new Set();
+  let nextQuestionTriggerSec = QUESTION_START_SEC;
+  let activeCanPlayHandler = null;
+
+  const player = {
+    lane: 1,
+    x: 0,
+    y: 0,
+    targetX: 0,
+    radius: 27,
+    state: 'run',
+    stateTimer: 0
+  };
+
+  let obstacles = [];
+  let coinItems = [];
+  let particles = [];
+
+  function getLaneX(laneIndex) {
+    const roadWidth = logicalWidth * 0.84;
+    const startX = (logicalWidth - roadWidth) / 2;
+    const laneWidth = roadWidth / 3;
+    return startX + laneWidth * laneIndex + laneWidth / 2;
+  }
+
+  function clearQuestionTimers() {
+    clearInterval(questionTimerInterval);
+    clearTimeout(questionTimeout);
+    questionTimerInterval = null;
+    questionTimeout = null;
+  }
+
+  function closeQuestionModal() {
+    clearQuestionTimers();
+    questionActive = false;
+    document.getElementById('question-modal').classList.add('hidden');
+  }
+
+  function triggerSurpriseQuestion() {
+    if (!QUESTIONS_ENABLED || QUESTIONS.length === 0 || questionActive || !gameRunning) return;
+
+    let pool = QUESTIONS.filter(q => !usedQuestionIds.has(q.id));
+    if (pool.length === 0) {
+      usedQuestionIds.clear();
+      pool = QUESTIONS.slice();
+    }
+    const chosenQ = pool[Math.floor(Math.random() * pool.length)];
+    usedQuestionIds.add(chosenQ.id);
+    nextQuestionTriggerSec += 18;
+
+    questionActive = true;
+    if (animFrameId) cancelAnimationFrame(animFrameId);
+
+    const modal = document.getElementById('question-modal');
+    const qTextEl = document.getElementById('q-text');
+    const qTimerEl = document.getElementById('q-countdown');
+    const qOptionsEl = document.getElementById('q-options');
+
+    qTextEl.innerText = chosenQ.question;
+    qOptionsEl.innerHTML = '';
+
+    let timeLeft = 15;
+    qTimerEl.innerText = `${timeLeft}s`;
+    modal.classList.remove('hidden');
+
+    const failByQuestion = () => {
+      closeQuestionModal();
+      endGame();
+    };
+
+    chosenQ.options.forEach((optText, idx) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'option-btn';
+      btn.innerText = optText;
+      btn.addEventListener('click', () => {
+        if (!questionActive) return;
+        if (idx === chosenQ.correctIndex) {
+          score += 10;
+          document.getElementById('score-val').innerText = Math.floor(score);
+          playCoinSound();
+          closeQuestionModal();
+          if (gameRunning && !pausedByPopup) {
+            gameLoop();
+          }
+        } else {
+          failByQuestion();
+        }
+      });
+      qOptionsEl.appendChild(btn);
+    });
+
+    clearQuestionTimers();
+    questionTimerInterval = setInterval(() => {
+      timeLeft--;
+      if (timeLeft > 0) {
+        qTimerEl.innerText = `${timeLeft}s`;
+      }
+    }, 1000);
+
+    questionTimeout = setTimeout(() => {
+      failByQuestion();
+    }, 15000);
+  }
+
+  function hideVideoPopup() {
+    const popup = document.getElementById('video-popup');
+    const videoEl = document.getElementById('popup-video-player');
+    const statusEl = document.getElementById('popup-video-status');
+    popup.classList.remove('active');
+
+    if (activeCanPlayHandler) {
+      videoEl.removeEventListener('canplay', activeCanPlayHandler);
+      activeCanPlayHandler = null;
+    }
+
+    try {
+      videoEl.pause();
+      videoEl.currentTime = 0;
+      videoEl.removeAttribute('src');
+      videoEl.load();
+    } catch (e) {}
+
+    statusEl.innerText = '';
+    clearTimeout(popupTimeout);
+    clearInterval(countdownInterval);
+
+    if (pausedByPopup && gameRunning && !questionActive) {
+      pausedByPopup = false;
+      gameLoop();
+    }
+  }
+
+  function forceAutoplayVideo(videoEl, statusEl) {
+    try {
+      videoEl.currentTime = 0;
+    } catch (e) {}
+    videoEl.muted = false;
+    statusEl.innerText = '';
+
+    const playPromise = videoEl.play();
+    if (playPromise && typeof playPromise.then === 'function') {
+      playPromise.then(() => {
+        statusEl.innerText = '';
+      }).catch(() => {
+        videoEl.muted = true;
+        videoEl.play().then(() => {
+          if (!userHasInteractedWithAudio) {
+            statusEl.innerText = '🔊 المس الشاشة لتفعيل صوت الفيديو';
+          }
+        }).catch(() => {
+          statusEl.innerText = '⚠️ تأكد من أن ملف الفيديو موجود في المستودع بصيغة MP4';
+        });
+      });
+    }
+  }
+
+  function showSpecificVideoPopup(chosen) {
+    if (!chosen || !chosen.url) return;
+
+    const popup = document.getElementById('video-popup');
+    const videoEl = document.getElementById('popup-video-player');
+    const titleEl = document.getElementById('popup-title');
+    const timerEl = document.getElementById('popup-countdown');
+    const statusEl = document.getElementById('popup-video-status');
+
+    clearTimeout(popupTimeout);
+    clearInterval(countdownInterval);
+    if (activeCanPlayHandler) {
+      videoEl.removeEventListener('canplay', activeCanPlayHandler);
+      activeCanPlayHandler = null;
+    }
+
+    if (POPUP_CONFIG.pauseGameDuringVideo && gameRunning) {
+      pausedByPopup = true;
+      if (animFrameId) cancelAnimationFrame(animFrameId);
+    }
+
+    const moodPrefix = chosen.mood === 'scare' ? '😱 ' : '😂 ';
+    titleEl.innerText = moodPrefix + (chosen.title || 'لقطة مفاجئة!');
+
+    videoEl.pause();
+    videoEl.removeAttribute('src');
+    videoEl.load();
+    videoEl.src = chosen.url;
+    videoEl.load();
+
+    popup.classList.add('active');
+
+    let hasStartedPlayback = false;
+    const startOnce = () => {
+      if (hasStartedPlayback) return;
+      hasStartedPlayback = true;
+      forceAutoplayVideo(videoEl, statusEl);
+    };
+
+    activeCanPlayHandler = startOnce;
+    videoEl.addEventListener('canplay', activeCanPlayHandler, { once: true });
+
+    if (videoEl.readyState >= 3) {
+      startOnce();
+    } else {
+      forceAutoplayVideo(videoEl, statusEl);
+    }
+
+    videoEl.addEventListener('error', () => {
+      statusEl.innerText = '⚠️ تعذر تشغيل الفيديو، ارفعي ملف MP4 في المستودع بنفس الاسم';
+    }, { once: true });
+
+    let remaining = chosen.durationSec || 4;
+    timerEl.innerText = `${remaining}s`;
+
+    countdownInterval = setInterval(() => {
+      remaining--;
+      if (remaining > 0) timerEl.innerText = `${remaining}s`;
+    }, 1000);
+
+    popupTimeout = setTimeout(() => {
+      hideVideoPopup();
+    }, (chosen.durationSec || 4) * 1000);
+  }
+
+  function resetGame() {
+    pausedByPopup = false;
+    triggeredScheduleIds = new Set();
+    usedQuestionIds = new Set();
+    nextQuestionTriggerSec = QUESTION_START_SEC;
+    closeQuestionModal();
+    hideVideoPopup();
+    resizeCanvas();
+    score = 0;
+    coins = 0;
+    speed = BASE_SPEED;
+    tempoLevel = 1;
+    frameCount = 0;
+    obstacles = [];
+    coinItems = [];
+    particles = [];
+
+    player.lane = 1;
+    player.x = getLaneX(1);
+    player.targetX = player.x;
+    player.y = logicalHeight - 130;
+    player.state = 'run';
+    player.stateTimer = 0;
+
+    document.getElementById('score-val').innerText = '0';
+    document.getElementById('coin-val').innerText = '0';
+  }
+
+  let touchStartX = 0;
+  let touchStartY = 0;
+
+  canvas.addEventListener('touchstart', e => {
+    if (!e.changedTouches || !e.changedTouches[0]) return;
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+  }, { passive: true });
+
+  canvas.addEventListener('touchend', e => {
+    if (!gameRunning || pausedByPopup || questionActive || !e.changedTouches || !e.changedTouches[0]) return;
+    const dx = e.changedTouches[0].screenX - touchStartX;
+    const dy = e.changedTouches[0].screenY - touchStartY;
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+      if (Math.abs(dx) > 25) {
+        if (dx > 0 && player.lane < 2) player.lane++;
+        else if (dx < 0 && player.lane > 0) player.lane--;
+      }
+    } else {
+      if (Math.abs(dy) > 25) {
+        if (dy < 0) triggerJump();
+        else triggerSlide();
+      }
+    }
+  }, { passive: true });
+
+  window.addEventListener('keydown', e => {
+    if (!gameRunning || pausedByPopup || questionActive) return;
+    if (e.key === 'ArrowRight' && player.lane < 2) player.lane++;
+    if (e.key === 'ArrowLeft' && player.lane > 0) player.lane--;
+    if (e.key === 'ArrowUp') triggerJump();
+    if (e.key === 'ArrowDown') triggerSlide();
+  });
+
+  function triggerJump() {
+    player.state = 'jump';
+    player.stateTimer = 36;
+  }
+
+  function triggerSlide() {
+    player.state = 'slide';
+    player.stateTimer = 36;
+  }
+
+  function spawnEntities() {
+    const lane = Math.floor(Math.random() * 3);
+    const types = ['jump', 'slide', 'block', 'fast_jump', 'sway_block'];
+    const type = types[Math.floor(Math.random() * types.length)];
+
+    obstacles.push({
+      lane: lane,
+      type: type,
+      y: -60,
+      swayOffset: 0,
+      swayDir: Math.random() > 0.5 ? 1 : -1
+    });
+
+    const coinLane = (lane + (Math.random() > 0.5 ? 1 : 2)) % 3;
+    for (let i = 0; i < 3; i++) {
+      coinItems.push({
+        lane: coinLane,
+        y: -60 - (i * 45),
+        collected: false
+      });
+    }
+  }
+
+  function createParticles(x, y, color) {
+    for (let i = 0; i < 10; i++) {
+      particles.push({
+        x, y,
+        vx: (Math.random() - 0.5) * 8,
+        vy: (Math.random() - 0.5) * 8,
+        life: 20,
+        color
+      });
+    }
+  }
+
+  function update() {
+    frameCount++;
+
+    const elapsedSec = Math.floor(frameCount / 60);
+    const newTempo = 1 + Math.floor(elapsedSec / 3);
+    if (newTempo > tempoLevel) {
+      tempoLevel = newTempo;
+    }
+    const targetTempoSpeed = Math.min(MAX_SPEED, BASE_SPEED + (tempoLevel - 1) * 0.65);
+    speed += (targetTempoSpeed - speed) * 0.04;
+
+    roadOffset = (roadOffset + speed) % 40;
+
+    document.getElementById('score-val').innerText = Math.floor(score);
+
+    if (QUESTIONS_ENABLED && QUESTIONS.length > 0 && elapsedSec >= nextQuestionTriggerSec) {
+      triggerSurpriseQuestion();
+      return;
+    }
+
+    if (POPUP_CONFIG.scheduleEnabled && POPUP_CONFIG.schedules.length > 0) {
+      POPUP_CONFIG.schedules.forEach(sch => {
+        if (!triggeredScheduleIds.has(sch.id) && elapsedSec >= sch.second) {
+          triggeredScheduleIds.add(sch.id);
+          const vid = POPUP_CONFIG.videos.find(v => v.id === sch.videoId);
+          if (vid) showSpecificVideoPopup(vid);
+        }
+      });
+    }
+
+    player.targetX = getLaneX(player.lane);
+    player.x += (player.targetX - player.x) * 0.24;
+
+    if (player.stateTimer > 0) {
+      player.stateTimer--;
+      if (player.stateTimer <= 0) {
+        player.state = 'run';
+      }
+    }
+
+    const spawnRate = Math.max(28, Math.floor(72 - (speed - BASE_SPEED) * 3.8));
+    if (frameCount % spawnRate === 0) {
+      spawnEntities();
+    }
+
+    for (let i = coinItems.length - 1; i >= 0; i--) {
+      const c = coinItems[i];
+      c.y += speed;
+      const cx = getLaneX(c.lane);
+
+      if (!c.collected && Math.abs(cx - player.x) < 32 && Math.abs(c.y - player.y) < 35) {
+        c.collected = true;
+        coins += 1;
+        score += 3;
+        document.getElementById('coin-val').innerText = coins;
+        document.getElementById('score-val').innerText = Math.floor(score);
+        playCoinSound();
+        createParticles(cx, c.y, '#ffaa00');
+      }
+
+      if (c.y > logicalHeight + 50 || c.collected) {
+        coinItems.splice(i, 1);
+      }
+    }
+
+    for (let i = obstacles.length - 1; i >= 0; i--) {
+      const obs = obstacles[i];
+      const itemSpeed = obs.type === 'fast_jump' ? speed * 1.3 : speed;
+      obs.y += itemSpeed;
+
+      if (obs.type === 'sway_block') {
+        obs.swayOffset += obs.swayDir * (1.5 + tempoLevel * 0.12);
+        if (Math.abs(obs.swayOffset) > 22) obs.swayDir *= -1;
+      }
+
+      const ox = getLaneX(obs.lane) + obs.swayOffset;
+
+      if (Math.abs(ox - player.x) < 28 && Math.abs(obs.y - player.y) < 24) {
+        let hit = false;
+        if (obs.type === 'block' || obs.type === 'sway_block') hit = true;
+        else if ((obs.type === 'jump' || obs.type === 'fast_jump') && player.state !== 'jump') hit = true;
+        else if (obs.type === 'slide' && player.state !== 'slide') hit = true;
+
+        if (hit) {
+          endGame();
+          return;
+        }
+      }
+
+      if (obs.y > logicalHeight + 60) {
+        obstacles.splice(i, 1);
+      }
+    }
+
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.life--;
+      if (p.life <= 0) particles.splice(i, 1);
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, logicalWidth, logicalHeight);
+
+    const roadWidth = logicalWidth * 0.84;
+    const startX = (logicalWidth - roadWidth) / 2;
+    const laneWidth = roadWidth / 3;
+
+    ctx.fillStyle = '#14100d';
+    ctx.fillRect(startX, 0, roadWidth, logicalHeight);
+
+    ctx.strokeStyle = 'rgba(255, 123, 0, 0.45)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(startX, 0); ctx.lineTo(startX, logicalHeight);
+    ctx.moveTo(startX + roadWidth, 0); ctx.lineTo(startX + roadWidth, logicalHeight);
+    ctx.stroke();
+
+    ctx.strokeStyle = 'rgba(255, 170, 0, 0.16)';
+    ctx.setLineDash([20, 20]);
+    ctx.lineDashOffset = -roadOffset;
+    for (let i = 1; i < 3; i++) {
+      ctx.beginPath();
+      ctx.moveTo(startX + laneWidth * i, 0);
+      ctx.lineTo(startX + laneWidth * i, logicalHeight);
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+
+    coinItems.forEach(c => {
+      const cx = getLaneX(c.lane);
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cx, c.y, 13, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffb703';
+      ctx.fill();
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = '#fff3b0';
+      ctx.stroke();
+      ctx.fillStyle = '#5c3c00';
+      ctx.font = '900 11px Cairo';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('L1', cx, c.y + 1);
+      ctx.restore();
+    });
+
+    obstacles.forEach(obs => {
+      const ox = getLaneX(obs.lane) + obs.swayOffset;
+      const w = laneWidth * 0.78;
+      ctx.save();
+
+      if (obs.type === 'jump') {
+        ctx.fillStyle = '#e63946';
+        drawRoundRect(ox - w / 2, obs.y - 14, w, 28, 8);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.font = '800 12px Cairo';
+        ctx.textAlign = 'center';
+        ctx.fillText('نط ⬆️', ox, obs.y + 4);
+      } else if (obs.type === 'fast_jump') {
+        ctx.fillStyle = '#ffaa00';
+        drawRoundRect(ox - w / 2, obs.y - 14, w, 28, 8);
+        ctx.fill();
+        ctx.fillStyle = '#0a0908';
+        ctx.font = '900 11px Cairo';
+        ctx.textAlign = 'center';
+        ctx.fillText('سريع ⬆️', ox, obs.y + 4);
+      } else if (obs.type === 'slide') {
+        ctx.fillStyle = '#8338ec';
+        drawRoundRect(ox - w / 2, obs.y - 22, w, 34, 8);
+        ctx.fill();
+        ctx.fillStyle = '#560bad';
+        ctx.fillRect(ox - w / 2, obs.y - 22, 6, 44);
+        ctx.fillRect(ox + w / 2 - 6, obs.y - 22, 6, 44);
+        ctx.fillStyle = '#fff';
+        ctx.font = '800 12px Cairo';
+        ctx.textAlign = 'center';
+        ctx.fillText('انزل ⬇️', ox, obs.y);
+      } else if (obs.type === 'sway_block') {
+        ctx.fillStyle = '#ff0054';
+        drawRoundRect(ox - w / 2, obs.y - 22, w, 44, 10);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.font = '900 11px Cairo';
+        ctx.textAlign = 'center';
+        ctx.fillText('متحرك ⚡', ox, obs.y + 4);
+      } else {
+        ctx.fillStyle = '#ff6b00';
+        drawRoundRect(ox - w / 2, obs.y - 24, w, 48, 10);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.font = '900 13px Cairo';
+        ctx.textAlign = 'center';
+        ctx.fillText('غَيّر ⬅️➡️', ox, obs.y + 5);
+      }
+      ctx.restore();
+    });
+
+    ctx.save();
+    let scale = 1;
+    let alpha = 1;
+
+    if (player.state === 'jump') {
+      const progress = Math.sin((player.stateTimer / 36) * Math.PI);
+      scale = 1 + progress * 0.45;
+    } else if (player.state === 'slide') {
+      scale = 0.72;
+      alpha = 0.85;
+    }
+
+    ctx.translate(player.x, player.y);
+    ctx.scale(scale, scale);
+    ctx.globalAlpha = alpha;
+
+    ctx.beginPath();
+    ctx.arc(0, 0, player.radius, 0, Math.PI * 2);
+    ctx.fillStyle = selectedChar.color;
+    ctx.fill();
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = '#ffffff';
+    ctx.stroke();
+
+    if (selectedChar.loadedImg && selectedChar.loadedImg.complete && selectedChar.loadedImg.naturalWidth > 0) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(0, 0, player.radius - 2, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.drawImage(selectedChar.loadedImg, -player.radius, -player.radius, player.radius * 2, player.radius * 2);
+      ctx.restore();
+    } else {
+      ctx.fillStyle = '#fff';
+      ctx.font = '900 12px Cairo';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(selectedChar.tag, 0, 1);
+    }
+
+    ctx.restore();
+
+    particles.forEach(p => {
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.life / 20;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    });
+  }
+
+  function gameLoop() {
+    if (!gameRunning || pausedByPopup || questionActive) return;
+    update();
+    draw();
+    animFrameId = requestAnimationFrame(gameLoop);
+  }
+
+  function goHome() {
+    gameRunning = false;
+    pausedByPopup = false;
+    if (animFrameId) cancelAnimationFrame(animFrameId);
+    closeQuestionModal();
+    hideVideoPopup();
+    document.getElementById('hud').classList.add('hidden');
+    document.getElementById('gameover-screen').classList.add('hidden');
+    document.getElementById('start-screen').classList.remove('hidden');
+    renderCharacterGrid();
+  }
+
+  function startGame() {
+    unlockAudioContext();
+    if (animFrameId) cancelAnimationFrame(animFrameId);
+    document.getElementById('start-screen').classList.add('hidden');
+    document.getElementById('gameover-screen').classList.add('hidden');
+    document.getElementById('studio-modal').classList.add('hidden');
+    document.getElementById('pin-modal').classList.add('hidden');
+    document.getElementById('hud').classList.remove('hidden');
+    resetGame();
+    gameRunning = true;
+    gameLoop();
+  }
+
+  function getRankByCoins(coinAmount) {
+    if (coinAmount > 500) return 'انت اسطورة العالم';
+    if (coinAmount >= 400) return 'تاريخي انت';
+    if (coinAmount >= 300) return 'اسطوري';
+    if (coinAmount >= 200) return 'كويس كويس';
+    if (coinAmount >= 100) return 'ماشي حالك';
+    return 'لا عاد تلعب 🙏🏼';
+  }
+
+  function endGame() {
+    gameRunning = false;
+    pausedByPopup = false;
+    if (animFrameId) cancelAnimationFrame(animFrameId);
+    closeQuestionModal();
+    hideVideoPopup();
+    const finalScore = Math.floor(score);
+    if (finalScore > bestScore) {
+      bestScore = finalScore;
+      localStorage.setItem('lvl1_best', bestScore);
+    }
+
+    document.getElementById('hud').classList.add('hidden');
+    document.getElementById('gameover-screen').classList.remove('hidden');
+
+    const resAvatar = document.getElementById('res-avatar');
+    resAvatar.style.background = selectedChar.color;
+    resAvatar.innerHTML = selectedChar.img
+      ? `<img src="${selectedChar.img}" alt="${selectedChar.name}">`
+      : selectedChar.tag.slice(0, 3);
+
+    document.getElementById('res-name').innerText = selectedChar.name;
+    document.getElementById('res-coins').innerText = coins;
+    document.getElementById('res-score').innerText = finalScore;
+    document.getElementById('res-best').innerText = bestScore;
+    document.getElementById('res-rank').innerText = getRankByCoins(coins);
+  }
+
+  document.getElementById('start-btn').addEventListener('click', startGame);
+  document.getElementById('restart-btn').addEventListener('click', startGame);
+  document.getElementById('home-btn').addEventListener('click', goHome);
+</script>
+</body>
+</html>
